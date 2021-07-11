@@ -18,3 +18,7 @@ It works by searching all files in source directory that have the same content (
 
 ### Requirements
 The code is implemented and tested with groovy 3.0.7
+
+### To implement next:
+1. Export results to CSV.
+2. Add concurrency with GPARS to optimize backie time.
