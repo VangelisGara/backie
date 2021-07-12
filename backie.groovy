@@ -23,25 +23,58 @@ if(shouldDeleteBackedUpFiles) {
 List<String> filesNotBackedUp = []
 
 String date = new Date().format('yyyy-MM-dd hh-mm')
-File logFile = new File("backie_${date}.out")
+String logFileName = "backie_${date}.out"
+File logFile = new File(logFileName)
 
-println "\nSource File Destination[${sourceFolderPath}]   Target File Destination(s)[${targetFolderPath}]\n"
+def printProgress = { long startTime, long total, long current ->
+    //long eta = current == 0 ? 0 : 
+      //  (total - current) * (System.currentTimeMillis() - startTime) / current;
+
+    //String etaHms = current == 0 ? "N/A" : 
+      //      String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(eta),
+        //            TimeUnit.MILLISECONDS.toMinutes(eta) % TimeUnit.HOURS.toMinutes(1),
+          //          TimeUnit.MILLISECONDS.toSeconds(eta) % TimeUnit.MINUTES.toSeconds(1));
+
+    StringBuilder string = new StringBuilder(140);   
+    int percent = (int) (current * 100 / total);
+    string
+        .append('\r')
+        .append(String.join("", Collections.nCopies(percent == 0 ? 2 : 2 - (int) (Math.log10(percent)), " ")))
+        .append(String.format(" %d%% [", percent))
+        .append(String.join("", Collections.nCopies(percent, "=")))
+        .append('>')
+        .append(String.join("", Collections.nCopies(100 - percent, " ")))
+        .append(']')
+        .append(String.join("", Collections.nCopies(current == 0 ? (int) (Math.log10(total)) : (int) (Math.log10(total)) - (int) (Math.log10(current)), " ")))
+        //.append(String.format(" %d/%d, ETA: %s", current, total, etaHms));
+
+    System.out.print(string);
+}
+
+println "\nInspecting which files from destination ${sourceFolderPath} is backed up to target destination ${targetFolderPath}...\n"
 logFile << "\nSource File Destination[${sourceFolderPath}]   Target File Destination(s)[${targetFolderPath}]\n\n"
+int current = 0;
+
+int total = 0;
+new File(sourceFolderPath).traverse(type: groovy.io.FileType.FILES) { it ->
+   total = total + 1
+}
+
 new File(sourceFolderPath).traverse(type: groovy.io.FileType.FILES) { source_it ->
+    printProgress(0,total,current)
+    current = current + 1
     String currentSourceFileName = source_it.toString()
     File currentSourceFile = new File(currentSourceFileName)
-    print currentSourceFileName + "   "
     logFile << currentSourceFileName + "   "
     Boolean found = false
+    System.in.newReader().readLine()
     new File(targetFolderPath).traverse(type: groovy.io.FileType.FILES) { target_it ->
 	String currentTargetFileName = target_it.toString()
         File currentTargetFile = new File(currentTargetFileName)
         if(FileUtils.contentEquals(currentSourceFile, currentTargetFile)) {
             found = true    
-	    print currentTargetFileName + "   "
 	    logFile << currentTargetFileName + "   "
 	    if(shouldDeleteBackedUpFiles) {
-	       print "\nDeleting file from source target..."
 	       logFile << "\nDeleting file from source target..."
 	       currentSourceFile.delete()
             }
@@ -49,12 +82,13 @@ new File(sourceFolderPath).traverse(type: groovy.io.FileType.FILES) { source_it 
     }
     if(!found) filesNotBackedUp.add(currentSourceFileName) 
     logFile << "\n"
-    println ""
 }
 
-println "\n\n\nSource target's files that have not beed backed up\n"
+printProgress(0,total,total)
+
 logFile << "\n\n\nSource target's files that have not beed backed up\n\n"
 filesNotBackedUp.forEach { 
-   it -> println it
    logFile << it + "\n"
 }
+
+println "\n\nInspection complete...Output file: ${logFileName}"
