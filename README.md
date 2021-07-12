@@ -27,3 +27,4 @@ The code is implemented and tested with groovy 3.0.7
 
 ### References
 https://stackoverflow.com/questions/852665/command-line-progress-bar-in-java
+https://stackoverflow.com/questions/687444/counting-the-number-of-files-in-a-directory-using-java
