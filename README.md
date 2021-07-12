@@ -26,6 +26,6 @@ The code is implemented and tested with groovy 3.0.7
 4. Track elapsed time (to track possible optimizations).
 
 ### References
-https://stackoverflow.com/questions/852665/command-line-progress-bar-in-java
-https://stackoverflow.com/questions/687444/counting-the-number-of-files-in-a-directory-using-java
-https://stackoverflow.com/questions/51994883/write-the-results-of-for-loop-to-csv-in-groovy
+- https://stackoverflow.com/questions/852665/command-line-progress-bar-in-java
+- https://stackoverflow.com/questions/687444/counting-the-number-of-files-in-a-directory-using-java
+- https://stackoverflow.com/questions/51994883/write-the-results-of-for-loop-to-csv-in-groovy
