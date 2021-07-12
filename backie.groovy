@@ -22,11 +22,16 @@ if(shouldDeleteBackedUpFiles) {
 
 List<String> filesNotBackedUp = []
 
+String date = new Date().format('yyyy-MM-dd hh-mm')
+File logFile = new File("backie_${date}.out")
+
 println "\nSource File Destination[${sourceFolderPath}]   Target File Destination(s)[${targetFolderPath}]\n"
+logFile << "\nSource File Destination[${sourceFolderPath}]   Target File Destination(s)[${targetFolderPath}]\n\n"
 new File(sourceFolderPath).traverse(type: groovy.io.FileType.FILES) { source_it ->
     String currentSourceFileName = source_it.toString()
     File currentSourceFile = new File(currentSourceFileName)
     print currentSourceFileName + "   "
+    logFile << currentSourceFileName + "   "
     Boolean found = false
     new File(targetFolderPath).traverse(type: groovy.io.FileType.FILES) { target_it ->
 	String currentTargetFileName = target_it.toString()
@@ -34,19 +39,22 @@ new File(sourceFolderPath).traverse(type: groovy.io.FileType.FILES) { source_it 
         if(FileUtils.contentEquals(currentSourceFile, currentTargetFile)) {
             found = true    
 	    print currentTargetFileName + "   "
+	    logFile << currentTargetFileName + "   "
 	    if(shouldDeleteBackedUpFiles) {
 	       print "\nDeleting file from source target..."
+	       logFile << "\nDeleting file from source target..."
 	       currentSourceFile.delete()
             }
         }
     }
     if(!found) filesNotBackedUp.add(currentSourceFileName) 
+    logFile << "\n"
     println ""
 }
 
 println "\n\n\nSource target's files that have not beed backed up\n"
-filesNotBackedUp.forEach { it -> println it }
-
-
-
-
+logFile << "\n\n\nSource target's files that have not beed backed up\n\n"
+filesNotBackedUp.forEach { 
+   it -> println it
+   logFile << it + "\n"
+}
