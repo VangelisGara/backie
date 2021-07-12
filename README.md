@@ -22,3 +22,5 @@ The code is implemented and tested with groovy 3.0.7
 ### To implement next:
 1. Export results to CSV.
 2. Add concurrency with GPARS to optimize backie time.
+3. Add progress bar.
+4. Add elapsed time (to track possible optimizations).
