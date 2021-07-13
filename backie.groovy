@@ -26,14 +26,6 @@ String logFileName = "backie_${date}.out"
 File logFile = new File(logFileName)
 
 def printProgress = { long startTime, long total, long current ->
-    long eta = current == 0 ? 0 : (total - current) * (System.currentTimeMillis() - startTime) / current;
-
-    String etaHms = current == 0 
-	? "N/A" 
-	: String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(eta),
-             TimeUnit.MILLISECONDS.toMinutes(eta) % TimeUnit.HOURS.toMinutes(1),
-             TimeUnit.MILLISECONDS.toSeconds(eta) % TimeUnit.MINUTES.toSeconds(1));
-
     StringBuilder string = new StringBuilder(140);   
     int percent = (int) (current * 100 / total);
     string
@@ -51,12 +43,12 @@ def printProgress = { long startTime, long total, long current ->
               : (int) (Math.log10(total)) - (int) (Math.log10(current)), " "
             )
          ))
-        .append(String.format(" %d/%d, ETA: %s", current, total, etaHms));
+        .append(String.format(" %d/%d", current, total));
 
     System.out.print(string);
 }
 
-println "\nInspecting which files from destination ${sourceFolderPath} is backed up to target destination ${targetFolderPath}...\n"
+println "Inspecting which files from destination [${sourceFolderPath}] is backed up to target destination [${targetFolderPath}]..."
 logFile << "\nSource File Destination[${sourceFolderPath}]   Target File Destination(s)[${targetFolderPath}]\n\n"
 
 int current = 0;
@@ -95,9 +87,11 @@ new File(sourceFolderPath).traverse(type: groovy.io.FileType.FILES) { source_it 
 
 printProgress(0,total,total)
 
+println "\nAlmost done..."
+
 logFile << "\n\n\nSource target's files that have not beed backed up\n\n"
 filesNotBackedUp.forEach { 
    logFile << it + "\n"
 }
 
-println "\n\nInspection complete...Output file: ${logFileName}"
+println "Inspection complete...Output file: ${logFileName}"
