@@ -21,9 +21,15 @@ if(shouldDeleteBackedUpFiles) {
    if(answer != "y") System.exit(0)
 }
 
-String date = new Date().format('yyyy-MM-dd hh-mm')
-String logFileName = "backie_${date}.out"
-File logFile = new File(logFileName)
+
+String date = new Date().format('yyyy-MM-dd hh-mm-ss')
+String outputDirName = "backie_output_${date}"
+File outputDir = new File(outputDirName)
+outputDir.mkdir()
+String logFileNameForBackedUp = "${outputDirName}/backed_up_files.out"
+String logFileNameForNotBackedUp = "${outputDirName}/not_backed_up_files.out"
+File logFileForBackedUp = new File(logFileNameForBackedUp)
+File logFileForNotBackedUp = new File(logFileNameForNotBackedUp)
 
 def printProgress = { long startTime, long total, long current ->
     StringBuilder string = new StringBuilder(140);   
@@ -49,7 +55,7 @@ def printProgress = { long startTime, long total, long current ->
 }
 
 println "Inspecting which files from destination [${sourceFolderPath}] is backed up to target destination [${targetFolderPath}]..."
-logFile << "\nSource File Destination[${sourceFolderPath}]   Target File Destination(s)[${targetFolderPath}]\n\n"
+logFileForBackedUp << "\nSource File Destination[${sourceFolderPath}]   Target File Destination(s)[${targetFolderPath}]\n\n"
 
 int current = 0;
 int total = 0;
@@ -67,31 +73,33 @@ new File(sourceFolderPath).traverse(type: groovy.io.FileType.FILES) { source_it 
     current = current + 1
     String currentSourceFileName = source_it.toString()
     File currentSourceFile = new File(currentSourceFileName)
-    logFile << currentSourceFileName + "   "
     Boolean found = false
+    List<String> whereIsBackedUp = []
     new File(targetFolderPath).traverse(type: groovy.io.FileType.FILES) { target_it ->
 	String currentTargetFileName = target_it.toString()
         File currentTargetFile = new File(currentTargetFileName)
         if(FileUtils.contentEquals(currentSourceFile, currentTargetFile)) {
-            found = true    
-	    logFile << currentTargetFileName + "   "
-	    if(shouldDeleteBackedUpFiles) {
-	       logFile << "\nDeleting file from source target..."
-	       currentSourceFile.delete()
-            }
+            found = true
+	    whereIsBackedUp.add(currentTargetFileName)
         }
     }
-    if(!found) filesNotBackedUp.add(currentSourceFileName) 
-    logFile << "\n"
+    if(!found) filesNotBackedUp.add(currentSourceFileName)
+    else {
+       if(shouldDeleteBackedUpFiles) {
+          logFileForBackedUp << "\nDeleting file from source target..."
+          currentSourceFile.delete()
+       }
+       logFileForBackedUp << currentSourceFileName + "   " + whereIsBackedUp +"\n"
+    } 
 }
 
 printProgress(0,total,total)
 
 println "\nAlmost done..."
 
-logFile << "\n\n\nSource target's files that have not beed backed up\n\n"
+logFileForNotBackedUp << "\n\n\nSource target's files that have not beed backed up\n\n"
 filesNotBackedUp.forEach { 
-   logFile << it + "\n"
+   logFileForNotBackedUp << it + "\n"
 }
 
-println "Inspection complete...Output file: ${logFileName}"
+println "Inspection complete...See output files in folder: ${outputDirName}"
