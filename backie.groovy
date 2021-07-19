@@ -31,7 +31,6 @@ if(shouldDeleteBackedUpFiles) {
 	
 }
 
-
 // Create the log files
 String date = new Date().format('yyyy-MM-dd hh-mm-ss')
 String outputDirName = "backie_output_${date}"
