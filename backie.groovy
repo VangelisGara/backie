@@ -57,7 +57,7 @@ def printProgress = { long current, long total ->
 		.append(" "*(current == 0 ? (int) (Math.log10(total)) : (int) (Math.log10(total)) - (int) (Math.log10(current))))
         	.append(String.format(" %d/%d", current, total))
 
-	System.out.print(string)
+	print string
 }
 
 // Initialization phase
